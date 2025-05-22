@@ -13,7 +13,6 @@ provider "aws" {
   profile = "default"  
 }
 
-
 resource "aws_vpc" "infra_vpc" {
   cidr_block = "10.0.0.0/16"
   enable_dns_support = true
@@ -27,6 +26,15 @@ resource "aws_security_group" "infra_sg" {
   vpc_id = aws_vpc.infra_vpc.id
   name   = "infra-sg"
   description = "Security group for EC2 instances"
+
+    ingress {
+    description = "Postgres"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # change to your IP for security
+  }
+
   ingress {
     from_port   = 21
     to_port     = 21
@@ -39,12 +47,15 @@ resource "aws_security_group" "infra_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere
   }
-}
-
-resource "aws_vpc_security_group_vpc_association" "infra_sg_association" {
-  security_group_id = aws_security_group.infra_sg.id
-  vpc_id            = aws_vpc.infra_vpc.id
-  depends_on        = [aws_vpc.infra_vpc]
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+    tags = {
+        Name = "infra-sg"
+    }
 }
 
 resource "aws_subnet" "infra_pb_subnet" {
