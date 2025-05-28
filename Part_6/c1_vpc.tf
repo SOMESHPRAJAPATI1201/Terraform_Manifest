@@ -27,7 +27,7 @@ resource "aws_security_group" "infra_sg" {
   name   = "infra-sg"
   description = "Security group for EC2 instances"
 
-    ingress {
+  ingress {
     description = "Postgres"
     from_port   = 5432
     to_port     = 5432
